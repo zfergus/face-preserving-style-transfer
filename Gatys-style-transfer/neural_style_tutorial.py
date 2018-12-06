@@ -10,12 +10,14 @@ Neural Transfer Using PyTorch
 Introduction
 ------------
 
-This tutorial explains how to implement the `Neural-Style algorithm <https://arxiv.org/abs/1508.06576>`__
+This tutorial explains how to implement the
+`Neural-Style algorithm <https://arxiv.org/abs/1508.06576>`__
 developed by Leon A. Gatys, Alexander S. Ecker and Matthias Bethge.
 Neural-Style, or Neural-Transfer, allows you to take an image and
 reproduce it with a new artistic style. The algorithm takes three images,
 an input image, a content-image, and a style-image, and changes the input
-to resemble the content of the content-image and the artistic style of the style-image.
+to resemble the content of the content-image and the artistic style of the
+style-image.
 
 
 .. figure:: /_static/img/neural-style/neuralstyle.png
@@ -27,10 +29,10 @@ to resemble the content of the content-image and the artistic style of the style
 # --------------------
 #
 # The principle is simple: we define two distances, one for the content
-# (:math:`D_C`) and one for the style (:math:`D_S`). :math:`D_C` measures how different the content
-# is between two images while :math:`D_S` measures how different the style is
-# between two images. Then, we take a third image, the input, and
-# transform it to minimize both its content-distance with the
+# (:math:`D_C`) and one for the style (:math:`D_S`). :math:`D_C` measures how
+# different the content is between two images while :math:`D_S` measures how
+# different the style is between two images. Then, we take a third image, the
+# input, and transform it to minimize both its content-distance with the
 # content-image and its style-distance with the style-image. Now we can
 # import the necessary packages and begin the neural transfer.
 #
@@ -68,8 +70,9 @@ import copy
 # content and style images. Running the neural transfer algorithm on large
 # images takes longer and will go much faster when running on a GPU. We can
 # use ``torch.cuda.is_available()`` to detect if there is a GPU available.
-# Next, we set the ``torch.device`` for use throughout the tutorial. Also the ``.to(device)``
-# method is used to move tensors or modules to a desired device.
+# Next, we set the ``torch.device`` for use throughout the tutorial. Also the
+# ``.to(device)`` method is used to move tensors or modules to a desired
+# device.
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -77,15 +80,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Loading the Images
 # ------------------
 #
-# Now we will import the style and content images. The original PIL images have values between 0 and 255, but when
-# transformed into torch tensors, their values are converted to be between
-# 0 and 1. The images also need to be resized to have the same dimensions.
-# An important detail to note is that neural networks from the
-# torch library are trained with tensor values ranging from 0 to 1. If you
-# try to feed the networks with 0 to 255 tensor images, then the activated
-# feature maps will be unable sense the intended content and style.
-# However, pre-trained networks from the Caffe library are trained with 0
-# to 255 tensor images.
+# Now we will import the style and content images. The original PIL images have
+# values between 0 and 255, but when transformed into torch tensors, their
+# values are converted to be between 0 and 1. The images also need to be
+# resized to have the same dimensions. An important detail to note is that
+# neural networks from the torch library are trained with tensor values ranging
+# from 0 to 1. If you try to feed the networks with 0 to 255 tensor images,
+# then the activated feature maps will be unable sense the intended content
+# and style. However, pre-trained networks from the Caffe library are trained
+# with 0 to 255 tensor images.
 #
 #
 # .. Note::
@@ -96,8 +99,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #     with name ``images`` in your current working directory.
 
 # desired size of the output image
-# imsize = 512 if torch.cuda.is_available() else 128  # use small size if no gpu
-imsize = 512
+imsize = 512 if torch.cuda.is_available() else 128  # use small size if no gpu
 
 loader = transforms.Compose([
     transforms.Resize(imsize),  # scale imported image
