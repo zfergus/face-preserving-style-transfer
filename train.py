@@ -73,7 +73,7 @@ def train(args):
 
     # Begin training the image transform network
     for epoch in range(start_epoch, args.epochs + 1):
-        img_transform.train()
+        img_transform.to(device).train()
         for batch_idx, (yc, _) in enumerate(content_loader):
             optimizer.zero_grad()
             yc = yc.to(device)
@@ -116,17 +116,20 @@ def train(args):
         # Save a model file to evaluate later
         print("Saving checkpoint and model file")
         img_transform.eval().cpu()
-        model_file = output_path / "model_{:02d}.pth".format(epoch)
-        torch.save(img_transform.state_dict(), model_file)
+        model_file = args.output_dir / "model_{:02d}.pth".format(epoch)
+        torch.save(img_transform.state_dict(), str(model_file))
+        print(("Saved model to {0}. You can run "
+                "`python stylize.py --model {0}` to continue stylize an image "
+                "this state.\n").format(model_file))
 
         # Save a checkpoint to, potentially, continue training. Different from
         # the model file because the optimizer's state is also saved
-        checkpoint_file = output_path / "checkpoint_{:02d}.pth".format(epoch)
+        checkpoint_file = args.output_dir / "checkpoint_{:02d}.pth".format(epoch)
         checkpoint = {"epoch": epoch, "model": img_transform.state_dict(),
                       "optimizer": optimizer.state_dict()}
-        torch.save(checkpoint, checkpoint_file)
+        torch.save(checkpoint, str(checkpoint_file))
         print(("Saved checkpoint to {0}. You can run "
-               "`python main.py --checkpoint {0}` to continue training from "
+               "`python train.py --checkpoint {0}` to continue training from "
                "this state.\n").format(checkpoint_file))
 
 
@@ -142,7 +145,7 @@ if __name__ == "__main__":
                             metavar="N",
                             help=("size to rescale content image(s) to "
                                   "(default: 256 x 256)"))
-        parser.add_argument("--feature-weight", type=float, default=1e0,
+        parser.add_argument("--feature-weight", type=float, default=1e5,
                             help="weight for feature loss (default: 1e0)")
         parser.add_argument("--style-image", type=pathlib.Path,
                             required=True, metavar="path/to/style.image",
@@ -152,10 +155,10 @@ if __name__ == "__main__":
                             help=("size to rescale the style image to "
                                   "(default: unscaled)"))
         parser.add_argument("--style-weights", type=float,
-                            default=[1e-3, 1e4, 1e5, 5e4, 1e5], nargs=5,
+                            default=[1e10, 1e10, 1e10, 1e10, 1e10], nargs=5,
                             help="weight for style loss (default: 1e10)")
         parser.add_argument("--regularization-weight", type=float,
-                            default=1e-6,
+                            default=1e0,
                             help="weight for regularized TV (default: 1e-6)")
         parser.add_argument("--output-dir", default=pathlib.Path("."),
                             metavar="path/to/output/", type=pathlib.Path,
@@ -174,7 +177,7 @@ if __name__ == "__main__":
         parser.add_argument("--no-cuda", action="store_true",
                             help="disables CUDA training")
         args = parser.parse_args()
-        print(args)
+        print("{}\n".format(args))
 
         args.output_dir.mkdir(parents=True, exist_ok=True)
         train(args)
