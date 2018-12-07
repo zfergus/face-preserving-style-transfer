@@ -21,6 +21,8 @@ def train(args):
 
     # Load the content images for training
     # Image values will be floating points in the range [0, 1]
+    print("Creating dataset for content images in {}".format(
+        args.content_images))
     content_transform = transforms.Compose([
         transforms.Resize(args.content_size),
         transforms.CenterCrop(args.content_size),
@@ -31,6 +33,7 @@ def train(args):
         content_data, batch_size=args.batch_size, shuffle=True, **kwargs)
 
     # Load the style image to train for
+    print("Loading style image {}".format(args.style_image))
     style_image = Image.open(args.style_image)
     if args.style_size:
         # Downsample the image
@@ -40,15 +43,17 @@ def train(args):
     ys = style_transform(Image.open(args.style_image)).repeat(
         args.batch_size, 1, 1, 1).to(device)
 
-    # Create the two networks to train
     # Newtork to train that stylizes images
+    print("Creating image transformation network")
     img_transform = ImageTransformNet().to(device)
     # Pretrained VGG network to return the relu values
+    print("Creating loss network")
     loss_net = LossNet().to(device)
     optimizer = torch.optim.Adam(img_transform.parameters(), lr=args.lr)
     mse_loss = torch.nn.MSELoss()
 
     # Precompute the Loss Network features of the style image
+    print("Computing features and gram matrices of style image")
     ys_features = loss_net(utils.normalize_batch(ys))
     # Precompute the gram matrices of the style features, used for style loss
     ys_grams = [utils.gram_matrix(feature) for feature in ys_features]
@@ -109,7 +114,8 @@ def train(args):
                     epoch, batch_idx * len(yc), len(content_loader.dataset),
                     100. * batch_idx / len(content_loader), loss.data.item()))
         # Save a model file to evaluate later
-        img_transform.eval.cpu()
+        print("Saving checkpoint and model file")
+        img_transform.eval().cpu()
         model_file = output_path / "model_{:02d}.pth".format(epoch)
         torch.save(img_transform.state_dict(), model_file)
 
