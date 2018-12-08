@@ -12,6 +12,7 @@ from loss_net import LossNet
 import utils
 
 
+
 def train(args):
     """Train the model image transformation network."""
     # Should computation be done on the GPU if available?
@@ -26,30 +27,32 @@ def train(args):
     content_transform = transforms.Compose([
         transforms.Resize(args.content_size),
         transforms.CenterCrop(args.content_size),
-        transforms.ToTensor()])
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: x * 255)])
     content_data = datasets.ImageFolder(
         str(args.content_images), content_transform)
     content_loader = torch.utils.data.DataLoader(
-        content_data, batch_size=args.batch_size, shuffle=True, **kwargs)
+        content_data, batch_size=args.batch_size)
 
     # Load the style image to train for
     print("Loading style image {}".format(args.style_image))
     style_image = Image.open(args.style_image)
-    if args.style_size:
-        # Downsample the image
+    if args.style_size:  # Downsample the image
         style_image.resize(args.style_size, Image.ANTIALIAS)
-    style_transform = transforms.ToTensor()
+    style_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: x * 255)])
     # Repeat the image so it matches the batch size for loss computations
-    ys = style_transform(Image.open(args.style_image)).repeat(
-        args.batch_size, 1, 1, 1).to(device)
+    ys = style_transform(Image.open(args.style_image))
+    ys = ys.repeat(args.batch_size, 1, 1, 1).to(device)
 
     # Newtork to train that stylizes images
     print("Creating image transformation network")
     img_transform = ImageTransformNet().to(device)
+    optimizer = torch.optim.Adam(img_transform.parameters(), lr=args.lr)
     # Pretrained VGG network to return the relu values
     print("Creating loss network")
     loss_net = LossNet().to(device)
-    optimizer = torch.optim.Adam(img_transform.parameters(), lr=args.lr)
     mse_loss = torch.nn.MSELoss()
 
     # Precompute the Loss Network features of the style image
@@ -76,34 +79,39 @@ def train(args):
         img_transform.to(device).train()
         for batch_idx, (yc, _) in enumerate(content_loader):
             optimizer.zero_grad()
-            yc = yc.to(device)
 
             # Stylize the content images
+            yc = yc.to(device)
             y = img_transform(yc)
 
             # Compute the Loss Network features of the contnent and stylized
             # content.
-            yc_features = loss_net(utils.normalize_batch(yc))
-            y_features = loss_net(utils.normalize_batch(y))
+            yc = utils.normalize_batch(yc)
+            y = utils.normalize_batch(y)
+            yc_features = loss_net(yc)
+            y_features = loss_net(y)
 
             # Feature loss is the mean squared error of the content and
             # stylized content
-            feature_loss = mse_loss(yc_features.relu3_3, y_features.relu3_3)
+            feature_loss = mse_loss(y_features.relu2_2, yc_features.relu2_2)
+            print(feature_loss.data.item())
 
             # Style loss id the Frobenius norm of the gram matrices
             style_loss = sum([style_weight * mse_loss(
                 utils.gram_matrix(y_feature), ys_gram[:yc.shape[0]])
                 for y_feature, ys_gram, style_weight in zip(
                     y_features, ys_grams, args.style_weights)])
+            print(style_loss.data.item() / 1e10)
 
             # Compute the regularized total variation of the stylized image
-            total_variation = (
-                torch.sum(torch.abs(y[:, :, :, :-1] - y[:, :, :, 1:])) +
-                torch.sum(torch.abs(y[:, :, :-1, :] - y[:, :, 1:, :])))
+            # total_variation = (
+            #     torch.sum(torch.abs(y[:, :, :, :-1] - y[:, :, :, 1:])) +
+            #     torch.sum(torch.abs(y[:, :, :-1, :] - y[:, :, 1:, :])))
 
             # The total loss is a weighted sum of the loss values
-            loss = (args.feature_weight * feature_loss + style_loss +
-                    args.regularization_weight * total_variation)
+            loss = args.feature_weight * feature_loss + style_loss
+            # loss = (args.feature_weight * feature_loss + style_loss +
+            #         args.regularization_weight * total_variation)
             # Optimize
             loss.backward()
             optimizer.step()
@@ -113,6 +121,17 @@ def train(args):
                 print("Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
                     epoch, batch_idx * len(yc), len(content_loader.dataset),
                     100. * batch_idx / len(content_loader), loss.data.item()))
+
+            print("saving")
+            tmp_transform = transforms.Compose([
+                transforms.Resize(256),
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: x * 255)])
+            tmp = tmp_transform(Image.open("./content/amber.jpg"))
+            tmp = img_transform(tmp.unsqueeze(0)).cpu()
+            tmp = tmp.detach().squeeze(0).numpy().transpose(1, 2, 0).astype("uint8")
+            tmp = Image.fromarray(tmp)
+            tmp.save("out{}{}.jpg".format(epoch, batch_idx))
         # Save a model file to evaluate later
         print("Saving checkpoint and model file")
         img_transform.eval().cpu()
@@ -179,6 +198,6 @@ if __name__ == "__main__":
         args = parser.parse_args()
         print("{}\n".format(args))
 
-        args.output_dir.mkdir(parents=True, exist_ok=True)
+        args.output_dir.mkdir(parents=True,  exist_ok=True)
         train(args)
     main()

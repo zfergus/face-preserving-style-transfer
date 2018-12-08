@@ -21,24 +21,22 @@ def stylize_image(args):
 
     # Load the content image to stylize
     print("Loading content image {}".format(args.content_image))
-    content_image = Image.open(args.content_image)
-    content_transform = transforms.ToTensor()
+    content_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: x * 255)])
     # Repeat the image so it matches the batch size for loss computations
-    x = content_transform(
-        Image.open(args.content_image)).unsqueeze(0).to(device)
+    x = content_transform(Image.open(args.content_image))
+    x = x.unsqueeze(0).to(device)
     with torch.no_grad():
         print("Loading the style image transform network, {}".format(
             args.style_model))
         img_transform = ImageTransformNet()
         model_params = torch.load(args.style_model)
         # remove saved deprecated running_* keys in InstanceNorm from the checkpoint
-        for k in list(model_params.keys()):
-            if re.search(r'in\d+\.running_(mean|var)$', k):
-                del state_dict[k]
         img_transform.load_state_dict(model_params)
         img_transform.to(device)
         stylized_img = img_transform(x).cpu()
-    stylized_img = (stylized_img.squeeze(0).numpy().transpose(1, 2, 0) * 255).astype("uint8")
+    stylized_img = stylized_img.squeeze(0).numpy().transpose(1, 2, 0).astype("uint8")
     stylized_img = Image.fromarray(stylized_img)
     stylized_img.save(args.output)
 
