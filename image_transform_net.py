@@ -84,9 +84,12 @@ class ImageTransformNet(nn.Module):
         self.reflection_padding = nn.ReflectionPad2d(40)
 
         # Downsample convolution networks
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=9, stride=1, padding=4)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=9, stride=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=2)
+        self.pad_conv1 = nn.ReflectionPad2d(padding=4)
+        self.pad_conv2 = nn.ReflectionPad2d(padding=1)
+        self.pad_conv3 = nn.ReflectionPad2d(padding=1)
         self.norm_conv1 = nn.InstanceNorm2d(32, affine=True)
         self.norm_conv2 = nn.InstanceNorm2d(64, affine=True)
         self.norm_conv3 = nn.InstanceNorm2d(128, affine=True)
@@ -118,21 +121,18 @@ class ImageTransformNet(nn.Module):
     def forward(self, x):
         """Feed the data throught the network."""
         x = self.reflection_padding(x)
-        x = self.nonlinearity(self.norm_conv1(self.conv1(x)))
-        x = self.nonlinearity(self.norm_conv2(self.conv2(x)))
-        x = self.nonlinearity(self.norm_conv3(self.conv3(x)))
+        x = self.nonlinearity(self.norm_conv1(self.conv1(self.pad_conv1(x))))
+        x = self.nonlinearity(self.norm_conv2(self.conv2(self.pad_conv2(x))))
+        x = self.nonlinearity(self.norm_conv3(self.conv3(self.pad_conv3(x))))
         x = self.res_block1(x)
         x = self.res_block2(x)
         x = self.res_block3(x)
         x = self.res_block4(x)
         x = self.res_block5(x)
-        x = self.nonlinearity(
-            self.norm_upsample_conv1(self.upsample_conv1(x)))
-        x = self.nonlinearity(
-            self.norm_upsample_conv2(self.upsample_conv2(x)))
-        x = self.output_nonlineaity(
-            self.norm_upsample_conv3(self.upsample_conv3(x)))
-        return x
+        x = self.nonlinearity(self.norm_upsample_conv1(self.upsample_conv1(x)))
+        x = self.nonlinearity(self.norm_upsample_conv2(self.upsample_conv2(x)))
+        x = self.norm_upsample_conv3(self.upsample_conv3(x))
+        return self.output_nonlineaity(x)
 
 
 if __name__ == "__main__":

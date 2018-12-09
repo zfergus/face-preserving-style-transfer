@@ -4,13 +4,10 @@ import argparse
 
 import torch
 from torchvision import transforms, datasets
-import numpy
-from PIL import Image
 
 from image_transform_net import ImageTransformNet
-from loss_net import LossNet
+from perceptual_loss_net import PerceptualLossNet
 import utils
-
 
 
 def train(args):
@@ -21,62 +18,32 @@ def train(args):
     kwargs = {"num_workers": 10, "pin_memory": True} if use_cuda else {}
 
     # Load the content images for training
-    # Image values will be floating points in the range [0, 1]
-    print("Creating dataset for content images in {}".format(
-        args.content_images))
-    content_transform = transforms.Compose([
-        transforms.Resize(args.content_size),
-        transforms.CenterCrop(args.content_size),
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255)])
-    content_data = datasets.ImageFolder(
-        str(args.content_images), content_transform)
-    content_loader = torch.utils.data.DataLoader(
-        content_data, batch_size=args.batch_size)
+    content_loader = utils.load_content_dataset(
+        args.content_images, args.content_size, args.batch_size)
 
     # Load the style image to train for
-    print("Loading style image {}".format(args.style_image))
-    style_image = Image.open(args.style_image)
-    if args.style_size:  # Downsample the image
-        style_image.resize(args.style_size, Image.ANTIALIAS)
-    style_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255)])
-    # Repeat the image so it matches the batch size for loss computations
-    ys = style_transform(Image.open(args.style_image))
-    ys = ys.repeat(args.batch_size, 1, 1, 1).to(device)
+    print("Loading style image {}\n".format(args.style_image))
+    ys = utils.load_image_tensor(
+        args.style_image, args.batch_size, args.style_size).to(device)
 
     # Newtork to train that stylizes images
-    print("Creating image transformation network")
+    print("Creating image transformation network ... ", end="")
     img_transform = ImageTransformNet().to(device)
     optimizer = torch.optim.Adam(img_transform.parameters(), lr=args.lr)
-    # Pretrained VGG network to return the relu values
-    print("Creating loss network")
-    loss_net = LossNet().to(device)
-    mse_loss = torch.nn.MSELoss()
+    print("done")
 
-    # Precompute the Loss Network features of the style image
-    print("Computing features and gram matrices of style image")
-    ys_features = loss_net(utils.normalize_batch(ys))
-    # Precompute the gram matrices of the style features, used for style loss
-    ys_grams = [utils.gram_matrix(feature) for feature in ys_features]
+    print("Creating loss network ... ", end="")
+    loss_net = PerceptualLossNet(args.content_weight, args.style_weights,
+                                 args.regularization_weight).to(device)
+    print("done\n")
 
     # Load from a checkpoint if necessary
-    start_epoch = 1
-    if args.checkpoint is not None:
-        print("Loading checkpoint {}".format(args.checkpoint))
-        checkpoint = torch.load(args.checkpoint)
-        start_epoch = checkpoint["epoch"] + 1
-        img_transform.load_state_dict(checkpoint["model"])
-        optimizer.load_state_dict(checkpoint["optimizer"])
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = args.lr
-        print("Continuing training from checkpoint "
-              "{:s} at epoch {:d}\n".format(args.checkpoint, start_epoch))
+    start_epoch = (utils.load_checkpoint(
+        args.checkpoint, img_transform, optimizer, args.lr)
+        if args.checkpoint else 1)
 
     # Begin training the image transform network
     for epoch in range(start_epoch, args.epochs + 1):
-        img_transform.to(device).train()
         for batch_idx, (yc, _) in enumerate(content_loader):
             optimizer.zero_grad()
 
@@ -84,72 +51,32 @@ def train(args):
             yc = yc.to(device)
             y = img_transform(yc)
 
-            # Compute the Loss Network features of the contnent and stylized
-            # content.
-            yc = utils.normalize_batch(yc)
-            y = utils.normalize_batch(y)
-            yc_features = loss_net(yc)
-            y_features = loss_net(y)
+            # Compute the perceptual loss
+            loss = loss_net.compute_perceptual_loss(y, yc, ys)
 
-            # Feature loss is the mean squared error of the content and
-            # stylized content
-            feature_loss = mse_loss(y_features.relu2_2, yc_features.relu2_2)
-            print(feature_loss.data.item())
-
-            # Style loss id the Frobenius norm of the gram matrices
-            style_loss = sum([style_weight * mse_loss(
-                utils.gram_matrix(y_feature), ys_gram[:yc.shape[0]])
-                for y_feature, ys_gram, style_weight in zip(
-                    y_features, ys_grams, args.style_weights)])
-            print(style_loss.data.item() / 1e10)
-
-            # Compute the regularized total variation of the stylized image
-            # total_variation = (
-            #     torch.sum(torch.abs(y[:, :, :, :-1] - y[:, :, :, 1:])) +
-            #     torch.sum(torch.abs(y[:, :, :-1, :] - y[:, :, 1:, :])))
-
-            # The total loss is a weighted sum of the loss values
-            loss = args.feature_weight * feature_loss + style_loss
-            # loss = (args.feature_weight * feature_loss + style_loss +
-            #         args.regularization_weight * total_variation)
             # Optimize
             loss.backward()
             optimizer.step()
 
             # Log progress
             if batch_idx % args.log_interval == 0:
-                print("Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
+                print(("Train Epoch: {:02d} [{:06d}/{:06d} ({:.0f}%)]\t"
+                       "Loss: {:12.2f}").format(
                     epoch, batch_idx * len(yc), len(content_loader.dataset),
                     100. * batch_idx / len(content_loader), loss.data.item()))
+            # Save checkpoint
+            if batch_idx != 0 and batch_idx % args.checkpoint_interval == 0:
+                utils.save_checkpoint(
+                    (args.output_dir / "checkpoint_{:02d}_{:06d}.pth".format(
+                            epoch, batch_idx)),
+                    epoch, img_transform, optimizer, device)
 
-            print("saving")
-            tmp_transform = transforms.Compose([
-                transforms.Resize(256),
-                transforms.ToTensor(),
-                transforms.Lambda(lambda x: x * 255)])
-            tmp = tmp_transform(Image.open("./content/amber.jpg"))
-            tmp = img_transform(tmp.unsqueeze(0)).cpu()
-            tmp = tmp.detach().squeeze(0).numpy().transpose(1, 2, 0).astype("uint8")
-            tmp = Image.fromarray(tmp)
-            tmp.save("out{}{}.jpg".format(epoch, batch_idx))
-        # Save a model file to evaluate later
-        print("Saving checkpoint and model file")
-        img_transform.eval().cpu()
-        model_file = args.output_dir / "model_{:02d}.pth".format(epoch)
-        torch.save(img_transform.state_dict(), str(model_file))
-        print(("Saved model to {0}. You can run "
-                "`python stylize.py --model {0}` to continue stylize an image "
-                "this state.\n").format(model_file))
-
-        # Save a checkpoint to, potentially, continue training. Different from
-        # the model file because the optimizer's state is also saved
-        checkpoint_file = args.output_dir / "checkpoint_{:02d}.pth".format(epoch)
-        checkpoint = {"epoch": epoch, "model": img_transform.state_dict(),
-                      "optimizer": optimizer.state_dict()}
-        torch.save(checkpoint, str(checkpoint_file))
-        print(("Saved checkpoint to {0}. You can run "
-               "`python train.py --checkpoint {0}` to continue training from "
-               "this state.\n").format(checkpoint_file))
+    # Save a model file to evaluate later
+    utils.save_model(
+        args.output_dir / "model.pth", img_transform, device)
+    utils.save_checkpoint(
+        args.output_dir / "final_checkpoint.pth",
+        epoch, img_transform, optimizer, device)
 
 
 if __name__ == "__main__":
@@ -164,8 +91,8 @@ if __name__ == "__main__":
                             metavar="N",
                             help=("size to rescale content image(s) to "
                                   "(default: 256 x 256)"))
-        parser.add_argument("--feature-weight", type=float, default=1e5,
-                            help="weight for feature loss (default: 1e0)")
+        parser.add_argument("--content-weight", type=float, default=1e5,
+                            help="weight for content loss (default: 1e5)")
         parser.add_argument("--style-image", type=pathlib.Path,
                             required=True, metavar="path/to/style.image",
                             help="path to the style image to train for")
@@ -178,7 +105,7 @@ if __name__ == "__main__":
                             help="weight for style loss (default: 1e10)")
         parser.add_argument("--regularization-weight", type=float,
                             default=1e0,
-                            help="weight for regularized TV (default: 1e-6)")
+                            help="weight for regularized TV (default: 1e0)")
         parser.add_argument("--output-dir", default=pathlib.Path("."),
                             metavar="path/to/output/", type=pathlib.Path,
                             help="where to store model and checkpoint files")
@@ -193,6 +120,9 @@ if __name__ == "__main__":
         parser.add_argument("--checkpoint", default=None, type=pathlib.Path,
                             metavar="path/to/checkpoint.pth",
                             help="checkpoint file to continue training")
+        parser.add_argument("--checkpoint-interval", default=20000, type=int,
+                            metavar="N",
+                            help="how many batches between checkpoint saves")
         parser.add_argument("--no-cuda", action="store_true",
                             help="disables CUDA training")
         args = parser.parse_args()
