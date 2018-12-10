@@ -22,10 +22,7 @@ def stylize(args):
 
     # Load the content image to stylize
     if args.video:
-        fourcc = cv.VideoWriter_fourcc('M', 'J', 'P', 'G')
-        fps = 30
-        width, height = 1280, 720
-        out = cv.VideoWriter(str(args.output), fourcc, fps, (width, height))
+        video = utils.VideReaderWriter(args.content_file, args.output, 16)
     else:
         content_image = utils.load_image_tensor(
             args.content_file, 1, args.content_shape).to(device)
@@ -41,22 +38,21 @@ def stylize(args):
         print("done")
 
         # Stylize the content image
-        if(args.video):
-            for i, frames in enumerate(utils.video_loader(args.content_file, 4)):
-                print("{:04d} / {:04d}: {}".format(i * 4, -1, frames.shape))
-                stylized_img = img_transform(frames.to(device)).cpu()
-                for frame in stylized_img:
-                    out.write(frame.numpy().transpose(1, 2, 0).astype("uint8"))
-            out.release()  # close out the video writer
+        if args.video:
+            for i, frames in enumerate(video.frames()):
+                stylized_frames = img_transform(frames.to(device)).cpu()
+                video.write(stylized_frames)
+                if i % 1 == 0:
+                    print(("Saved frame: {:04d}/{:04d} ({:.0f}%)").format(
+                        (i + 1) * 16, video.frame_count,
+                        100. * ((i + 1) * 16) / video.frame_count))
         else:
             print("Stylizing image ... ", end="")
             sys.stdout.flush()
             stylized_img = img_transform(content_image).cpu()
             print("done")
+            utils.save_image_tensor(args.output, stylized_img)
 
-    # Save the stylized image
-    if not args.video:
-        utils.save_image_tensor(args.output, stylized_img)
     print("Saved stylized {} to {}".format(
         "video" if args.video else "image", args.output))
 

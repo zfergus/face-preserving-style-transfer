@@ -92,37 +92,44 @@ def save_image_tensor(filename, image_tensor):
     image.save(filename)
 
 
-def video_loader(filename, batch_size):
-    """Load a video for torch."""
-    cap = cv.VideoCapture(str(filename))
-    frameCount = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-    frameWidth = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
-    frameHeight = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+class VideReaderWriter:
+    def __init__(self, in_file, out_file, batch_size=16):
+        self.in_video = cv.VideoCapture(str(in_file))
+        self.frame_count = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
+        self.fps = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
+        self.frame_width = int(self.in_video.get(cv.CAP_PROP_FRAME_WIDTH))
+        self.frame_height = int(self.in_video.get(cv.CAP_PROP_FRAME_HEIGHT))
 
-    buf = numpy.empty((batch_size, frameHeight, frameWidth, 3), dtype='uint8')
+        self.batch_size = batch_size
+        self.buf = numpy.empty(
+            (self.batch_size, self.frame_height, self.frame_width, 3),
+            dtype='uint8')
 
-    fc = 0
-    ret = True
+        fourcc = cv.VideoWriter_fourcc(*'FFV1')
+        pathlib.Path(out_file).parent.mkdir(parents=True, exist_ok=True)
+        self.out_video = cv.VideoWriter(str(out_file) + ".mkv", fourcc,
+                                        self.fps,
+                                        (self.frame_width, self.frame_width))
 
-    while fc < frameCount and ret:
-        nFrames = min(batch_size, frameCount - fc)
-        for i in range(nFrames):
-            ret, buf[i] = cap.read()
-            fc += 1
-        yield torch.tensor(buf[:nFrames].transpose(0, 3, 2, 1)).float()
+    def frames(self):
+        fc = 0
+        ret = True
 
-    cap.release()
+        while fc < self.frame_count and ret:
+            nFrames = min(self.batch_size, self.frame_count - fc)
+            for i in range(nFrames):
+                ret, self.buf[i] = self.in_video.read()
+                fc += 1
+            yield torch.tensor(
+                self.buf[:nFrames].transpose(0, 3, 2, 1)).float()
 
+        self.close()
 
-def save_video_tensor(filename, video_tensor):
-    # initialize video writer
-    fourcc = cv.VideoWriter_fourcc('M', 'J', 'P', 'G')
-    fps = 30
-    width, height = video_tensor.shape[2:]
-    out = cv2.VideoWriter(str(filename), fourcc, fps, (width, height))
+    def write(self, frames):
+        for frame in frames:
+            self.out_video.write(
+                frame.numpy().transpose(1, 2, 0).astype("uint8"))
 
-    for frame in video_tensor:
-        out.write(frame)
-
-    # close out the video writer
-    out.release()
+    def close(self):
+        self.in_video.release()
+        self.out_video.release()
