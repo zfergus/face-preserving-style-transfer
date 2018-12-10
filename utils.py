@@ -1,24 +1,9 @@
 """Utilties for neural style transfer."""
+import pathlib
 
 import torch
 from torchvision import transforms, datasets
 from PIL import Image
-
-
-def save_checkpoint(filename, epoch, model, optimizer, device="cpu"):
-    """
-    Save a checkpoint to, potentially, continue training.
-
-    Different from the model file because the optimizer's state is also saved.
-    """
-    model.eval().cpu()
-    checkpoint = {"epoch": epoch, "model": model.state_dict(),
-                  "optimizer": optimizer.state_dict()}
-    torch.save(checkpoint, str(filename))
-    print(("Saved checkpoint to {0}. You can run "
-           "`python train.py --checkpoint {0}` to continue training from "
-           "this state.").format(filename))
-    model.to(device).train()
 
 
 def load_checkpoint(filename, model, optimizer, lr):
@@ -35,13 +20,20 @@ def load_checkpoint(filename, model, optimizer, lr):
     return start_epoch
 
 
-def save_model(filename, model, device="cpu"):
-    """Save the model weights."""
+def save_checkpoint(filename, epoch, model, optimizer, device="cpu"):
+    """
+    Save a checkpoint to, potentially, continue training.
+
+    Different from the model file because the optimizer's state is also saved.
+    """
     model.eval().cpu()
-    torch.save(model.state_dict(), str(filename))
-    print(("Saved model to {0}. You can run "
-           "`python stylize.py --model {0}` to stylize an image").format(
-           model_file))
+    checkpoint = {"epoch": epoch, "model": model.state_dict(),
+                  "optimizer": optimizer.state_dict()}
+    pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
+    torch.save(checkpoint, str(filename))
+    print(("Saved checkpoint to {0}. You can run "
+           "`python train.py --checkpoint {0}` to continue training from "
+           "this state.").format(filename))
     model.to(device).train()
 
 
@@ -50,6 +42,17 @@ def load_model(filename, model):
     model_params = torch.load(filename)
     model.load_state_dict(model_params)
     return model
+
+
+def save_model(filename, model, device="cpu"):
+    """Save the model weights."""
+    model.eval().cpu()
+    pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
+    torch.save(model.state_dict(), str(filename))
+    print(("Saved model to {0}. You can run "
+           "`python stylize.py --model {0}` to stylize an image").format(
+           model_file))
+    model.to(device).train()
 
 
 def load_content_dataset(content_path, content_size, batch_size):
@@ -68,11 +71,11 @@ def load_content_dataset(content_path, content_size, batch_size):
     return torch.utils.data.DataLoader(content_data, batch_size=batch_size)
 
 
-def load_image_tensor(filename, batch_size, image_size=None):
+def load_image_tensor(filename, batch_size, image_shape=None):
     """Load an image for torch."""
     image = Image.open(filename)
-    if image_size:  # Downsample the image
-        image.resize(image_size, Image.ANTIALIAS)
+    if image_shape:  # Downsample the image
+        image = image.resize(image_shape, Image.ANTIALIAS)
     image_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x * 255)])
@@ -84,4 +87,5 @@ def save_image_tensor(filename, image_tensor):
     """Save a tensor of an image."""
     image = Image.fromarray(
         image_tensor.squeeze(0).numpy().transpose(1, 2, 0).astype("uint8"))
+    pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
     image.save(filename)

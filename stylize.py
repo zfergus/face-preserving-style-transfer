@@ -22,14 +22,15 @@ def stylize_image(args):
     # Load the content image to stylize
     print("Loading content image ({}) ... ".format(args.content_image), end="")
     content_image = utils.load_image_tensor(
-        args.content_image, 1, args.content_size).to(device)
+        args.content_image, 1, args.content_shape).to(device)
     print("done")
 
     with torch.no_grad():
         # Load the style transfer model
         print("Loading the style transfer model ({}) ... ".format(
             args.style_model), end="")
-        img_transform = utils.load_model(ImageTransformNet()).to(device)
+        img_transform = utils.load_model(
+            args.style_model, ImageTransformNet()).to(device)
         print("done")
 
         # Stylize the content image
@@ -52,10 +53,9 @@ if __name__ == "__main__":
         parser.add_argument("--content-image", type=pathlib.Path,
                             required=True, metavar="path/to/content/",
                             help="folder where training data is located")
-        parser.add_argument("--content-size", type=int, default=None,
+        parser.add_argument("--content-shape", type=int, default=None,
                             metavar="N", nargs=2,
-                            help=("size to rescale content image(s) to "
-                                  "(default: 256 x 256)"))
+                            help=("size to rescale content image(s) to"))
         parser.add_argument("--model", "--style-model", type=pathlib.Path,
                             required=True, metavar="path/to/model.pth",
                             dest="style_model",
