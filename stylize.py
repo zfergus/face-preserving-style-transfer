@@ -56,7 +56,7 @@ def stylize(args):
     # Save the stylized image
     if not args.video:
         utils.save_image_tensor(args.output, stylized_img)
-    print("Saved stylized {} to {} ... ".format(
+    print("Saved stylized {} to {}".format(
         "video" if args.video else "image", args.output))
 
 
