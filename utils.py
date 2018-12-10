@@ -96,7 +96,7 @@ class VideReaderWriter:
     def __init__(self, in_file, out_file, batch_size=16):
         self.in_video = cv.VideoCapture(str(in_file))
         self.frame_count = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
-        self.fps = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
+        self.fps = int(self.in_video.get(cv.CAP_PROP_FPS))
         self.frame_width = int(self.in_video.get(cv.CAP_PROP_FRAME_WIDTH))
         self.frame_height = int(self.in_video.get(cv.CAP_PROP_FRAME_HEIGHT))
 
@@ -105,11 +105,11 @@ class VideReaderWriter:
             (self.batch_size, self.frame_height, self.frame_width, 3),
             dtype='uint8')
 
-        fourcc = cv.VideoWriter_fourcc(*'FFV1')
+        fourcc = cv.VideoWriter_fourcc(*'MPEG')
         pathlib.Path(out_file).parent.mkdir(parents=True, exist_ok=True)
         self.out_video = cv.VideoWriter(str(out_file) + ".mkv", fourcc,
                                         self.fps,
-                                        (self.frame_width, self.frame_width))
+                                        (self.frame_width, self.frame_height))
 
     def frames(self):
         fc = 0
@@ -118,7 +118,13 @@ class VideReaderWriter:
         while fc < self.frame_count and ret:
             nFrames = min(self.batch_size, self.frame_count - fc)
             for i in range(nFrames):
-                ret, self.buf[i] = self.in_video.read()
+                ret, buffer_i = self.in_video.read()
+                if buffer_i is not None:
+                    self.buf[i] = buffer_i
+                else:
+                    nFrames = i
+                    ret = False
+                    break
                 fc += 1
             yield torch.tensor(
                 self.buf[:nFrames].transpose(0, 3, 1, 2)).float()
