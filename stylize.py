@@ -42,10 +42,11 @@ def stylize(args):
 
         # Stylize the content image
         if(args.video):
-            for frames in utils.video_loader(args.content_file, 4):
-                stylized_img = img_transform(frames).cpu()
+            for i, frames in enumerate(utils.video_loader(args.content_file, 4)):
+                print("{:04d} / {:04d}: {}".format(i * 4, -1, frames.shape))
+                stylized_img = img_transform(frames.to(device)).cpu()
                 for frame in stylized_img:
-                    out.write(frame.numpy())
+                    out.write(frame.numpy().transpose(1, 2, 0).astype("uint8"))
             out.release()  # close out the video writer
         else:
             print("Stylizing image ... ", end="")
