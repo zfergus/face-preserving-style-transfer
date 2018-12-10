@@ -121,7 +121,7 @@ class VideReaderWriter:
                 ret, self.buf[i] = self.in_video.read()
                 fc += 1
             yield torch.tensor(
-                self.buf[:nFrames].transpose(0, 3, 2, 1)).float()
+                self.buf[:nFrames].transpose(0, 3, 1, 2)).float()
 
         self.close()
 
