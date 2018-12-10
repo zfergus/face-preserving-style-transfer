@@ -1,9 +1,10 @@
 """Utilties for neural style transfer."""
 import pathlib
-
+import numpy
 import torch
 from torchvision import transforms, datasets
 from PIL import Image
+import cv2 as cv
 
 
 def load_checkpoint(filename, model, optimizer, lr):
@@ -89,3 +90,37 @@ def save_image_tensor(filename, image_tensor):
         image_tensor.squeeze(0).numpy().transpose(1, 2, 0).astype("uint8"))
     pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
     image.save(filename)
+
+
+def video_loader(filename, batch_size):
+    """Load a video for torch."""
+    cap = cv.VideoCapture(str(filename))
+    frameCount = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+    frameWidth = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+    frameHeight = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+
+    buf = numpy.empty((batch_size, frameHeight, frameWidth, 3), dtype='uint8')
+
+    fc = 0
+    ret = True
+
+    while fc < frameCount and ret:
+        ret, buf[fc] = cap.read()
+        fc += 1
+        yield torch.tensor(buf.transpose(0, 3, 2, 1)).float()
+
+    cap.release()
+
+
+def save_video_tensor(filename, video_tensor):
+    # initialize video writer
+    fourcc = cv.VideoWriter_fourcc('M', 'J', 'P', 'G')
+    fps = 30
+    width, height = video_tensor.shape[2:]
+    out = cv2.VideoWriter(str(filename), fourcc, fps, (width, height))
+
+    for frame in video_tensor:
+        out.write(frame)
+
+    # close out the video writer
+    out.release()
