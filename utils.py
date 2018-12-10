@@ -90,8 +90,8 @@ def load_image_tensor(filename, batch_size, image_shape=None):
 def save_image_tensor(filename, image_tensor):
     """Save a tensor of an image."""
     image_array = image_tensor.clone().squeeze(0).numpy()
-    image_array *= np.array(image_net_std).reshape(3, 1, 1)
-    image_array += np.array(image_net_mean).reshape(3, 1, 1)
+    image_array *= numpy.array(image_net_std).reshape(3, 1, 1)
+    image_array += numpy.array(image_net_mean).reshape(3, 1, 1)
     image_array *= 255
     image = Image.fromarray(
         image_array.clip(0, 255).transpose(1, 2, 0).astype("uint8"))
