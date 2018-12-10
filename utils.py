@@ -40,7 +40,7 @@ def save_checkpoint(filename, epoch, model, optimizer, device="cpu"):
 
 def load_model(filename, model):
     """Load the model parameters in {filename}."""
-    model_params = torch.load(filename)
+    model_params = torch.load(str(filename))
     model.load_state_dict(model_params)
     return model
 
@@ -105,9 +105,11 @@ def video_loader(filename, batch_size):
     ret = True
 
     while fc < frameCount and ret:
-        ret, buf[fc] = cap.read()
-        fc += 1
-        yield torch.tensor(buf.transpose(0, 3, 2, 1)).float()
+        nFrames = min(batch_size, frameCount - fc)
+        for i in range(nFrames):
+            ret, buf[i] = cap.read()
+            fc += 1
+        yield torch.tensor(buf[:nFrames].transpose(0, 3, 2, 1)).float()
 
     cap.release()
 
