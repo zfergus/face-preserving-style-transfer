@@ -6,11 +6,14 @@ from torchvision import transforms, datasets
 from PIL import Image
 import cv2 as cv
 
+image_net_mean = [0.485, 0.456, 0.406]
+image_net_std = [0.229, 0.224, 0.225]
+
 
 def load_checkpoint(filename, model, optimizer, lr):
     """Load from a checkpoint."""
     print("Loading checkpoint {}".format(filename))
-    checkpoint = torch.load(filename)
+    checkpoint = torch.load(filename, map_location="cpu")
     start_epoch = checkpoint["epoch"] + 1
     model.load_state_dict(checkpoint["model"])
     optimizer.load_state_dict(checkpoint["optimizer"])
@@ -67,7 +70,7 @@ def load_content_dataset(content_path, content_size, batch_size):
         transforms.Resize(content_size),
         transforms.CenterCrop(content_size),
         transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255)])
+        transforms.Normalize(mean=image_net_mean, std=image_net_std)])
     content_data = datasets.ImageFolder(str(content_path), content_transform)
     return torch.utils.data.DataLoader(content_data, batch_size=batch_size)
 
@@ -79,15 +82,19 @@ def load_image_tensor(filename, batch_size, image_shape=None):
         image = image.resize(image_shape, Image.ANTIALIAS)
     image_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255)])
+        transforms.Normalize(mean=image_net_mean, std=image_net_std)])
     # Repeat the image so it matches the batch size for loss computations
     return image_transform(image).repeat(batch_size, 1, 1, 1)
 
 
 def save_image_tensor(filename, image_tensor):
     """Save a tensor of an image."""
+    image_array = image_tensor.clone().squeeze(0).numpy()
+    image_array *= np.array(image_net_std).reshape(3, 1, 1)
+    image_array += np.array(image_net_mean).reshape(3, 1, 1)
+    image_array *= 255
     image = Image.fromarray(
-        image_tensor.squeeze(0).numpy().transpose(1, 2, 0).astype("uint8"))
+        image_array.clip(0, 255).transpose(1, 2, 0).astype("uint8"))
     pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
     image.save(filename)
 

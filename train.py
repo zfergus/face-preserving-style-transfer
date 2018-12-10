@@ -104,8 +104,8 @@ if __name__ == "__main__":
                             default=[1e10, 1e10, 1e10, 1e10, 1e10], nargs=5,
                             help="weight for style loss (default: 1e10)")
         parser.add_argument("--regularization-weight", type=float,
-                            default=1e0,
-                            help="weight for regularized TV (default: 1e0)")
+                            default=1e-3,
+                            help="weight for regularized TV (default: 1e-3)")
         parser.add_argument("--output-dir", default=pathlib.Path("."),
                             metavar="path/to/output/", type=pathlib.Path,
                             help="where to store model and checkpoint files")

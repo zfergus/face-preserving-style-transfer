@@ -51,25 +51,16 @@ class PerceptualLossNet(torch.nn.Module):
                 output[self.layer_name_mapping[name]] = x
         return LossOutput(**output)
 
-    @staticmethod
-    def normalize_batch(batch):
-        """Normalize using imagenet mean and std."""
-        mean = batch.new_tensor([0.485, 0.456, 0.406]).view(-1, 1, 1)
-        std = batch.new_tensor([0.229, 0.224, 0.225]).view(-1, 1, 1)
-        batch = batch / 255.0
-        return (batch - mean) / std
-
     def compute_perceptual_loss(self, y, yc, ys):
         """Compute the perceptual loss."""
         # Precompute the gram matrices of the style features
         if not self.ys_grams:
-            ys_features = self(self.normalize_batch(ys))
-            self.ys_grams = [gram_matrix(feature) for feature in ys_features]
+            self.ys_grams = [gram_matrix(feature) for feature in self(ys)]
 
         # Compute the Loss Network features of the content and stylized
         # content.
-        yc_features = self(self.normalize_batch(yc))
-        y_features = self(self.normalize_batch(y))
+        yc_features = self(yc)
+        y_features = self(y)
 
         # Feature loss is the mean squared error of the content and
         # stylized content
@@ -84,8 +75,8 @@ class PerceptualLossNet(torch.nn.Module):
 
         # Compute the regularized total variation of the stylized image
         # total_variation = self.regularization_weight * (
-        #     torch.sum(torch.abs(y[:, :, :, :-1] - y[:, :, :, 1:])) +
-        #     torch.sum(torch.abs(y[:, :, :-1, :] - y[:, :, 1:, :])))
+        #     torch.sum(torch.abs(y[:, :, :, 1:] - y[:, :, :, :-1])) +
+        #     torch.sum(torch.abs(y[:, :, 1:, :] - y[:, :, -1:, :])))
 
         # The total loss is a weighted sum of the loss values
         # return content_loss + style_loss + total_variation
