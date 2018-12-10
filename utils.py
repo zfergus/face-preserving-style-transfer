@@ -52,7 +52,7 @@ def save_model(filename, model, device="cpu"):
     torch.save(model.state_dict(), str(filename))
     print(("Saved model to {0}. You can run "
            "`python stylize.py --model {0}` to stylize an image").format(
-           model_file))
+           filename))
     model.to(device).train()
 
 
@@ -92,8 +92,11 @@ def save_image_tensor(filename, image_tensor):
     image.save(filename)
 
 
-class VideReaderWriter:
+class VideoReaderWriter:
+    """Class to read and write a video file with the same properties."""
+
     def __init__(self, in_file, out_file, batch_size=16):
+        """Open the input video and output video."""
         self.in_video = cv.VideoCapture(str(in_file))
         self.frame_count = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
         self.fps = int(self.in_video.get(cv.CAP_PROP_FPS))
@@ -107,11 +110,16 @@ class VideReaderWriter:
 
         fourcc = cv.VideoWriter_fourcc(*'MPEG')
         pathlib.Path(out_file).parent.mkdir(parents=True, exist_ok=True)
-        self.out_video = cv.VideoWriter(str(out_file) + ".mkv", fourcc,
+        self.out_video = cv.VideoWriter(str(out_file), fourcc,
                                         self.fps,
                                         (self.frame_width, self.frame_height))
 
     def frames(self):
+        """
+        Get the frames of the input as a generator.
+
+        Closes both videos upon completion.
+        """
         fc = 0
         ret = True
 
@@ -132,10 +140,12 @@ class VideReaderWriter:
         self.close()
 
     def write(self, frames):
+        """Write frames to the output video."""
         for frame in frames:
             self.out_video.write(
                 frame.numpy().transpose(1, 2, 0).astype("uint8"))
 
     def close(self):
+        """Close the input and output videos."""
         self.in_video.release()
         self.out_video.release()

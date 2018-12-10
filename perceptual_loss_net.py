@@ -64,7 +64,7 @@ class PerceptualLossNet(torch.nn.Module):
         # Precompute the gram matrices of the style features
         if not self.ys_grams:
             ys_features = self(self.normalize_batch(ys))
-            ys_grams = [gram_matrix(feature) for feature in ys_features]
+            self.ys_grams = [gram_matrix(feature) for feature in ys_features]
 
         # Compute the Loss Network features of the content and stylized
         # content.
@@ -80,7 +80,7 @@ class PerceptualLossNet(torch.nn.Module):
         style_loss = sum([style_weight * self.mse_loss(
                 gram_matrix(y_feature), ys_gram[:yc.shape[0]])
             for y_feature, ys_gram, style_weight in zip(
-                y_features, ys_grams, self.style_weights)])
+                y_features, self.ys_grams, self.style_weights)])
 
         # Compute the regularized total variation of the stylized image
         total_variation = self.regularization_weight * (

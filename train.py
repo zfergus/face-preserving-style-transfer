@@ -65,7 +65,7 @@ def train(args):
                     epoch, batch_idx * len(yc), len(content_loader.dataset),
                     100. * batch_idx / len(content_loader), loss.data.item()))
             # Save checkpoint
-            if batch_idx != 0 and batch_idx % args.checkpoint_interval == 0:
+            if batch_idx % args.checkpoint_interval == 0:
                 utils.save_checkpoint(
                     (args.output_dir / "checkpoint_{:02d}_{:06d}.pth".format(
                             epoch, batch_idx)),
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         parser.add_argument("--checkpoint", default=None, type=pathlib.Path,
                             metavar="path/to/checkpoint.pth",
                             help="checkpoint file to continue training")
-        parser.add_argument("--checkpoint-interval", default=20000, type=int,
+        parser.add_argument("--checkpoint-interval", default=5000, type=int,
                             metavar="N",
                             help="how many batches between checkpoint saves")
         parser.add_argument("--no-cuda", action="store_true",

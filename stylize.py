@@ -22,7 +22,8 @@ def stylize(args):
 
     # Load the content image to stylize
     if args.video:
-        video = utils.VideReaderWriter(args.content_file, args.output, 4)
+        args.output = args.output.with_suffix(".mkv")
+        video = utils.VideoReaderWriter(args.content_file, args.output, 4)
     else:
         content_image = utils.load_image_tensor(
             args.content_file, 1, args.content_shape).to(device)
