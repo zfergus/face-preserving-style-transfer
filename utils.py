@@ -84,7 +84,7 @@ def load_image_tensor(filename, batch_size, image_shape=None):
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x * 255)])
     # Repeat the image so it matches the batch size for loss computations
-    return image_transform(image).repeat(batch_size, 1, 1, 1)
+    return image_transform(image)[:3].repeat(batch_size, 1, 1, 1)
 
 
 def save_image_tensor(filename, image_tensor):
@@ -92,7 +92,7 @@ def save_image_tensor(filename, image_tensor):
     image_array = image_tensor.clone().squeeze(0).numpy().clip(0, 255)
     image = Image.fromarray(image_array.transpose(1, 2, 0).astype("uint8"))
     pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
-    image.save(filename)
+    image.save(filename, subsampling=0, quality=100)
 
 
 class VideoReaderWriter:
