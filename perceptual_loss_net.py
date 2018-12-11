@@ -62,7 +62,7 @@ class PerceptualLossNet(torch.nn.Module):
     def compute_perceptual_loss(self, y, yc, ys):
         """Compute the perceptual loss."""
         # Precompute the gram matrices of the style features
-        if not self.ys_grams:
+        if self.ys_grams is None:
             ys_features = self(self.normalize_batch(ys))
             self.ys_grams = [gram_matrix(feature) for feature in ys_features]
 
@@ -79,10 +79,11 @@ class PerceptualLossNet(torch.nn.Module):
             y_features.relu2_2, yc_features.relu2_2)
 
         # Style loss id the Frobenius norm of the gram matrices
-        style_loss = sum([style_weight * self.mse_loss(
+        style_loss = 0.0
+        for y_feature, ys_gram, style_weight in zip(
+                y_features, self.ys_grams, self.style_weights):
+            style_loss += style_weight * self.mse_loss(
                 gram_matrix(y_feature), ys_gram[:yc.shape[0]])
-            for y_feature, ys_gram, style_weight in zip(
-                y_features, self.ys_grams, self.style_weights)])
 
         # Compute the regularized total variation of the stylized image
         # total_variation = self.regularization_weight * (
