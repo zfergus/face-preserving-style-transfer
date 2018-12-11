@@ -51,15 +51,26 @@ class PerceptualLossNet(torch.nn.Module):
                 output[self.layer_name_mapping[name]] = x
         return LossOutput(**output)
 
+    @staticmethod
+    def normalize_batch(batch):
+        """Normalize using imagenet mean and std."""
+        mean = batch.new_tensor([0.485, 0.456, 0.406]).view(-1, 1, 1)
+        std = batch.new_tensor([0.229, 0.224, 0.225]).view(-1, 1, 1)
+        batch = batch / 255.0
+        return (batch - mean) / std
+
     def compute_perceptual_loss(self, y, yc, ys):
         """Compute the perceptual loss."""
         # Precompute the gram matrices of the style features
         if not self.ys_grams:
-            self.ys_grams = [gram_matrix(feature) for feature in self(ys)]
+            ys_features = self(self.normalize_batch(ys))
+            self.ys_grams = [gram_matrix(feature) for feature in ys_features]
 
         # Compute the Loss Network features of the content and stylized
         # content.
+        yc = self.normalize_batch(yc)
         yc_features = self(yc)
+        y = self.normalize_batch(y)
         y_features = self(y)
 
         # Feature loss is the mean squared error of the content and

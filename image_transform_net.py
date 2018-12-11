@@ -114,8 +114,9 @@ class ImageTransformNet(nn.Module):
 
         # Use a ReLU function as the nonlinear activation
         self.nonlinearity = nn.ReLU()
-        # Normalize the output to a range [0, 1]
-        # self.output_nonlineaity = nn.Tanh()
+        # Normalize the output to a range [0, 255]
+        self.tanh = nn.Tanh()
+        self.output_nonlineaity = lambda x: (self.tanh(x) + 1) / 2 * 255
 
     def forward(self, x):
         """Feed the data throught the network."""
@@ -130,9 +131,8 @@ class ImageTransformNet(nn.Module):
         x = self.res_block5(x)
         x = self.nonlinearity(self.norm_upsample_conv1(self.upsample_conv1(x)))
         x = self.nonlinearity(self.norm_upsample_conv2(self.upsample_conv2(x)))
-        # x = self.norm_upsample_conv3(self.upsample_conv3(x))
-        # return self.output_nonlineaity(x)
-        return self.upsample_conv3(x)
+        x = self.norm_upsample_conv3(self.upsample_conv3(x))
+        return self.output_nonlineaity(x)
 
 
 if __name__ == "__main__":
