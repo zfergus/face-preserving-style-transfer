@@ -13,7 +13,7 @@ image_net_std = [0.229, 0.224, 0.225]
 def load_checkpoint(filename, model, optimizer, lr):
     """Load from a checkpoint."""
     print("Loading checkpoint {}".format(filename))
-    checkpoint = torch.load(filename, map_location="cpu")
+    checkpoint = torch.load(str(filename), map_location="cpu")
     start_epoch = checkpoint["epoch"] + 1
     model.load_state_dict(checkpoint["model"])
     optimizer.load_state_dict(checkpoint["optimizer"])
@@ -24,12 +24,13 @@ def load_checkpoint(filename, model, optimizer, lr):
     return start_epoch
 
 
-def save_checkpoint(filename, epoch, model, optimizer, device="cpu"):
+def save_checkpoint(filename, epoch, model, optimizer):
     """
     Save a checkpoint to, potentially, continue training.
 
     Different from the model file because the optimizer's state is also saved.
     """
+    out_device = torch.device("cuda" if model.is_cuda else "cpu")
     model.eval().cpu()
     checkpoint = {"epoch": epoch, "model": model.state_dict(),
                   "optimizer": optimizer.state_dict()}
@@ -38,7 +39,7 @@ def save_checkpoint(filename, epoch, model, optimizer, device="cpu"):
     print(("Saved checkpoint to {0}. You can run "
            "`python train.py --checkpoint {0}` to continue training from "
            "this state.").format(filename))
-    model.to(device).train()
+    model.to(out_device).train()
 
 
 def load_model(filename, model):
@@ -48,15 +49,16 @@ def load_model(filename, model):
     return model
 
 
-def save_model(filename, model, device="cpu"):
+def save_model(filename, model):
     """Save the model weights."""
+    out_device = torch.device("cuda" if model.is_cuda else "cpu")
     model.eval().cpu()
     pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), str(filename))
     print(("Saved model to {0}. You can run "
            "`python stylize.py --model {0}` to stylize an image").format(
            filename))
-    model.to(device).train()
+    model.to(out_device).train()
 
 
 def load_content_dataset(content_path, content_size, batch_size):

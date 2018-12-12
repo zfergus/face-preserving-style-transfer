@@ -60,23 +60,27 @@ def train(args):
 
             # Log progress
             if batch_idx % args.log_interval == 0:
+                n_examples_seen = (batch_idx + 1) * args.batch_size
                 print(("Train Epoch: {:02d} [{:06d}/{:06d} ({:.0f}%)]\t"
                        "Loss: {:12.2f}").format(
-                    epoch, batch_idx * len(yc), len(content_loader.dataset),
-                    100. * batch_idx / len(content_loader), loss.data.item()))
+                    epoch, n_examples_seen, len(content_loader.dataset),
+                    100. * n_examples_seen / len(content_loader),
+                    loss.data.item()))
             # Save checkpoint
             if batch_idx % args.checkpoint_interval == 0:
                 utils.save_checkpoint(
                     (args.output_dir / "checkpoint_{:02d}_{:06d}.pth".format(
                             epoch, batch_idx)),
                     epoch, img_transform, optimizer, device)
+                utils.save_model(
+                    (args.output_dir / "model_{:02d}_{:06d}.pth".format(
+                            epoch, batch_idx)), img_transform)
 
     # Save a model file to evaluate later
-    utils.save_model(
-        args.output_dir / "model.pth", img_transform, device)
+    utils.save_model(args.output_dir / "model.pth", img_transform)
     utils.save_checkpoint(
         args.output_dir / "final_checkpoint.pth",
-        epoch, img_transform, optimizer, device)
+        epoch, img_transform, optimizer)
 
 
 if __name__ == "__main__":
