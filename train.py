@@ -68,19 +68,17 @@ def train(args):
                     loss.data.item()))
             # Save checkpoint
             if batch_idx % args.checkpoint_interval == 0:
+                epoch_batch_str = "_{:02d}_{:06d}.pth".format(epoch, batch_idx)
                 utils.save_checkpoint(
-                    (args.output_dir / "checkpoint_{:02d}_{:06d}.pth".format(
-                            epoch, batch_idx)),
-                    epoch, img_transform, optimizer, device)
-                utils.save_model(
-                    (args.output_dir / "model_{:02d}_{:06d}.pth".format(
-                            epoch, batch_idx)), img_transform)
+                    args.output_dir / ("checkpoint" + epoch_batch_str),
+                    epoch, img_transform, optimizer)
+                utils.save_model(args.output_dir / ("model" + epoch_batch_str),
+                                 img_transform)
 
     # Save a model file to evaluate later
     utils.save_model(args.output_dir / "model.pth", img_transform)
-    utils.save_checkpoint(
-        args.output_dir / "final_checkpoint.pth",
-        epoch, img_transform, optimizer)
+    utils.save_checkpoint(args.output_dir / "final_checkpoint.pth", epoch,
+                          img_transform, optimizer)
 
 
 if __name__ == "__main__":
