@@ -73,9 +73,10 @@ package-lock.json
 # Mine
 tmp*
 images/coco
+images/faces
 papers
 others
 images/content/bridge.jpg
 styles/mosaic/bridge.png
-styles/wave/beach.mkv
-styles/wave/small.mkv
+*.mkv
+styles/old

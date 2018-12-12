@@ -44,7 +44,7 @@ def stylize(args):
                 stylized_frames = img_transform(frames.to(device)).cpu()
                 video.write(stylized_frames)
                 if i % 1 == 0:
-                    current_frame = max((i + 1) * 16, video.frame_count)
+                    current_frame = max((i + 1) * 4, video.frame_count)
                     print(("Saved frame: {:04d}/{:04d} ({:.0f}%)").format(
                         current_frame, video.frame_count,
                         100. * current_frame / video.frame_count))
