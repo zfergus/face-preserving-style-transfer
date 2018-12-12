@@ -71,14 +71,14 @@ def train(args):
                 epoch_batch_str = "_{:02d}_{:06d}.pth".format(epoch, batch_idx)
                 utils.save_checkpoint(
                     args.output_dir / ("checkpoint" + epoch_batch_str),
-                    epoch, img_transform, optimizer)
+                    epoch, img_transform, optimizer, device)
                 utils.save_model(args.output_dir / ("model" + epoch_batch_str),
-                                 img_transform)
+                                 img_transform, device)
 
     # Save a model file to evaluate later
-    utils.save_model(args.output_dir / "model.pth", img_transform)
+    utils.save_model(args.output_dir / "model.pth", img_transform, device)
     utils.save_checkpoint(args.output_dir / "final_checkpoint.pth", epoch,
-                          img_transform, optimizer)
+                          img_transform, optimizer, device)
 
 
 if __name__ == "__main__":

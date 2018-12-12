@@ -24,13 +24,12 @@ def load_checkpoint(filename, model, optimizer, lr):
     return start_epoch
 
 
-def save_checkpoint(filename, epoch, model, optimizer):
+def save_checkpoint(filename, epoch, model, optimizer, device):
     """
     Save a checkpoint to, potentially, continue training.
 
     Different from the model file because the optimizer's state is also saved.
     """
-    out_device = torch.device("cuda" if model.is_cuda else "cpu")
     model.eval().cpu()
     checkpoint = {"epoch": epoch, "model": model.state_dict(),
                   "optimizer": optimizer.state_dict()}
@@ -39,7 +38,7 @@ def save_checkpoint(filename, epoch, model, optimizer):
     print(("Saved checkpoint to {0}. You can run "
            "`python train.py --checkpoint {0}` to continue training from "
            "this state.").format(filename))
-    model.to(out_device).train()
+    model.to(device).train()
 
 
 def load_model(filename, model):
@@ -49,16 +48,15 @@ def load_model(filename, model):
     return model
 
 
-def save_model(filename, model):
+def save_model(filename, model, device):
     """Save the model weights."""
-    out_device = torch.device("cuda" if model.is_cuda else "cpu")
     model.eval().cpu()
     pathlib.Path(filename).parent.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), str(filename))
     print(("Saved model to {0}. You can run "
            "`python stylize.py --model {0}` to stylize an image").format(
            filename))
-    model.to(out_device).train()
+    model.to(device).train()
 
 
 def load_content_dataset(content_path, content_size, batch_size):
