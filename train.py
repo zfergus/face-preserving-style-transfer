@@ -6,7 +6,7 @@ import torch
 from torchvision import transforms, datasets
 
 from image_transform_net import ImageTransformNet
-from perceptual_loss_net import PerceptualLossNet
+from perceptual_loss_net import PerceptualLossNet, FacePerceptualLossNet
 import utils
 
 
@@ -33,8 +33,13 @@ def train(args):
     print("done")
 
     print("Creating loss network ... ", end="")
-    loss_net = PerceptualLossNet(args.content_weight, args.style_weights,
-                                 args.regularization_weight).to(device)
+    if args.face:
+        loss_net = FacePerceptualLossNet(
+            args.content_weight, args.style_weights,
+            args.regularization_weight).to(device)
+    else:
+        loss_net = PerceptualLossNet(args.content_weight, args.style_weights,
+                                     args.regularization_weight).to(device)
     print("done\n")
 
     # Load from a checkpoint if necessary
@@ -127,6 +132,8 @@ if __name__ == "__main__":
                             help="how many batches between checkpoint saves")
         parser.add_argument("--no-cuda", action="store_true",
                             help="disables CUDA training")
+        parser.add_argument("--face", action="store_true",
+                            help="facial preserving network")
         args = parser.parse_args()
         print("{}\n".format(args))
 
