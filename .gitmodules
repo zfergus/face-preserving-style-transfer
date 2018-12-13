@@ -3,4 +3,4 @@
 	url = git@github.com:TwoBranchDracaena/OpenFace-PyTorch.git
 [submodule "mtcnn-pytorch"]
 	path = mtcnn-pytorch
-	url = git@github.com:TropComplique/mtcnn-pytorch.git
+	url = git@github.com:zfergus/mtcnn-pytorch.git
