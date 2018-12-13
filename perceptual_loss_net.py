@@ -3,10 +3,15 @@ Compute the style and content loss using a VGG-16 model trained on ImageNet.
 
 Uses perceptual loss to compute the style and content loss.
 """
+import pathlib
 import torch
 import torchvision
-
+import torch.nn.functional as F
+from PIL import Image
 from collections import namedtuple
+
+import mtcnn.detector
+import openface.net
 
 LossOutput = namedtuple(
     "LossOutput", ["relu1_2", "relu2_2", "relu3_3", "relu4_3"])
@@ -93,3 +98,51 @@ class PerceptualLossNet(torch.nn.Module):
         # The total loss is a weighted sum of the loss values
         # return content_loss + style_loss + total_variation
         return content_loss + style_loss
+
+
+class FacePerceptualLossNet(PerceptualLossNet):
+    """Account for loss in facial recognition."""
+
+    def __init__(self, content_weight, style_weights, regularization_weight):
+        """Initialize a face detection model on top of the perceptual loss."""
+        super(FacePerceptualLossNet, self).__init__(
+            content_weight, style_weights, regularization_weight)
+        self.face_recog_model = openface.net.model
+        model_file = (pathlib.Path(__file__).resolve().parent /
+                      "OpenFace-PyTorch" / "net.pth")
+        self.face_recog_model.load_state_dict(torch.load(model_file))
+        self.face_recog_model.eval()
+        self.n_faces_seen = 0
+
+    def compute_perceptual_loss(self, y, yc, ys):
+        """Compute the perceptual loss including the face loss."""
+        loss = super(FacePerceptualLossNet, self).compute_perceptual_loss(
+            y, yc, ys)
+
+        facial_loss = 0.0
+        for i, image in enumerate(yc):
+            image_array = image.clone().numpy().clip(0, 255)
+            pil_image = Image.fromarray(
+                image_array.transpose(1, 2, 0).astype("uint8"))
+            bounding_boxes, landmarks = mtcnn.detector.detect_faces(pil_image)
+            for face_bb in bounding_boxes:
+                if face_bb[-1] > 0.9:
+                    print("Face found")
+                    self.n_faces_seen += 1
+                    b = face_bb[:-1].round().astype("int")
+
+                    yc_face = yc[i, :, b[1]:b[3], b[0]:b[2]].unsqueeze(0)
+                    y_face = y[i, :, b[1]:b[3], b[0]:b[2]].unsqueeze(0)
+
+                    yc_face = F.interpolate(
+                        yc_face, size=(96, 96), mode="bilinear",
+                        align_corners=False)
+                    y_face = F.interpolate(
+                        y_face, size=(96, 96), mode="bilinear",
+                        align_corners=False)
+
+                    facial_loss += self.mse_loss(
+                        self.face_recog_model(yc_face),
+                        self.face_recog_model(y_face))
+
+        return loss + 1e8 * facial_loss
