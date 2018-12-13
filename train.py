@@ -64,7 +64,7 @@ def train(args):
                 print(("Train Epoch: {:02d} [{:06d}/{:06d} ({:.0f}%)]\t"
                        "Loss: {:12.2f}").format(
                     epoch, n_examples_seen, len(content_loader.dataset),
-                    100. * n_examples_seen / len(content_loader),
+                    100. * n_examples_seen / len(content_loader.dataset),
                     loss.data.item()))
             # Save checkpoint
             if batch_idx % args.checkpoint_interval == 0:
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                             help=("size to rescale the style image to "
                                   "(default: unscaled)"))
         parser.add_argument("--style-weights", type=float,
-                            default=[1e10, 1e10, 1e10, 1e10, 1e10], nargs=5,
+                            default=[1e10, 1e10, 1e10, 1e10], nargs=4,
                             help="weight for style loss (default: 1e10)")
         parser.add_argument("--regularization-weight", type=float,
                             default=1e-3,
