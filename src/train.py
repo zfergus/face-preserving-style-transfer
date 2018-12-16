@@ -6,7 +6,7 @@ import torch
 from torchvision import transforms, datasets
 
 from image_transform_net import ImageTransformNet
-from perceptual_loss_net import PerceptualLossNet, FacePerceptualLossNet
+from perceptual_loss_net import PerceptualLossNet
 import utils
 
 
@@ -34,9 +34,10 @@ def train(args):
 
     print("Creating loss network ... ", end="")
     if args.face:
+        from .face_perceptual_loss_net import FacePerceptualLossNet
         loss_net = FacePerceptualLossNet(
             args.content_weight, args.style_weights,
-            args.regularization_weight).to(device)
+            args.regularization_weight, args.face_weight).to(device)
     else:
         loss_net = PerceptualLossNet(args.content_weight, args.style_weights,
                                      args.regularization_weight).to(device)

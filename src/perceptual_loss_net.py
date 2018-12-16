@@ -84,7 +84,7 @@ class PerceptualLossNet(torch.nn.Module):
             style_loss += style_weight * self.mse_loss(
                 gram_matrix(y_feature), ys_gram[:yc.shape[0]])
 
-        Compute the regularized total variation of the stylized image
+        # Compute the regularized total variation of the stylized image
         total_variation = self.regularization_weight * (
             torch.sum(torch.abs(y[:, :, :, 1:] - y[:, :, :, :-1])) +
             torch.sum(torch.abs(y[:, :, 1:, :] - y[:, :, -1:, :])))

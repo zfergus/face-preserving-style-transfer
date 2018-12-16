@@ -4,19 +4,18 @@ Compute the facial loss using facial recognition.
 Compute the style and content loss using a VGG-16 model trained on ImageNet.
 Uses perceptual loss to compute the style, content loss, and facial loss.
 """
-import pathlib
 import numpy
 import torch
 import torch.nn.functional as F
 from PIL import Image
 
-import mtcnn.detector
-import openface
+from . import mtcnn
+from . import openface
 
-import perceptual_loss_net
+from . import perceptual_loss_net
 
 
-class FacePerceptualLossNet(PerceptualLossNet):
+class FacePerceptualLossNet(perceptual_loss_net.PerceptualLossNet):
     """Account for loss in facial recognition."""
 
     def __init__(self, content_weight, style_weights, regularization_weight,
