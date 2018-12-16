@@ -80,3 +80,5 @@ styles/mosaic/bridge.png
 *.mkv
 styles/old
 coco*
+**checkpoint*
+**model_0*
