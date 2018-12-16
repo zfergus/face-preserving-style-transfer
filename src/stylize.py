@@ -1,14 +1,8 @@
 """Stylize an image using the trained image transformation network."""
 import pathlib
 import argparse
-import re
 import sys
-
 import torch
-from torchvision import transforms, datasets
-import numpy
-from PIL import Image
-import cv2 as cv
 
 from image_transform_net import ImageTransformNet
 import utils
