@@ -111,8 +111,8 @@ if __name__ == "__main__":
                             default=[1e10, 1e10, 1e10, 1e10], nargs=4,
                             help="weight for style loss (default: 1e10)")
         parser.add_argument("--regularization-weight", type=float,
-                            default=1e-3,
-                            help="weight for regularized TV (default: 1e-3)")
+                            default=1e-6,
+                            help="weight for regularized TV (default: 1e-6)")
         parser.add_argument("--output-dir", default=pathlib.Path("."),
                             metavar="path/to/output/", type=pathlib.Path,
                             help="where to store model and checkpoint files")
@@ -134,6 +134,8 @@ if __name__ == "__main__":
                             help="disables CUDA training")
         parser.add_argument("--face", action="store_true",
                             help="facial preserving network")
+        parser.add_argument("--face-weight", type=float, default=1e6,
+                            help="weight for facial loss (default: 1e6)")
         args = parser.parse_args()
         print("{}\n".format(args))
 
