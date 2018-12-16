@@ -39,17 +39,22 @@ class FacePerceptualLossNet(PerceptualLossNet):
 
         facial_loss = 0.0
         for i, image in enumerate(yc):
-            image_array = image.clone().numpy().clip(0, 255)
+            image_array = image.cpu().numpy().clip(0, 255)
             pil_image = Image.fromarray(
                 image_array.transpose(1, 2, 0).astype("uint8"))
             bounding_boxes, landmarks = mtcnn.detector.detect_faces(pil_image)
             for face_bb in bounding_boxes:
                 if face_bb[-1] > 0.9:
-                    print("Face found")
+                    # Face found
                     self.n_faces_seen += 1
                     b = face_bb[:-1].round().astype("int")
+                    b[::2] = numpy.clip(b[::2], 0, yc.shape[2])
+                    b[1::2] = numpy.clip(b[1::2], 0, yc.shape[3])
 
-                    yc_face = yc[i, :, b[1]:b[3], b[0]:b[2]].unsqueeze(0)
+                    yc_face = yc[i, :, b[1]:b[3], b[0]:b[2]]
+                    if yc_face.nelement() == 0:
+                        continue
+                    yc_face = yc_face.unsqueeze(0)
                     y_face = y[i, :, b[1]:b[3], b[0]:b[2]].unsqueeze(0)
 
                     yc_face = F.interpolate(
@@ -63,4 +68,4 @@ class FacePerceptualLossNet(PerceptualLossNet):
                         self.face_recog_model(yc_face),
                         self.face_recog_model(y_face))
 
-        return loss + 1e8 * facial_loss
+        return loss + self.face_weight * facial_loss

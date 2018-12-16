@@ -3,6 +3,11 @@ Compute the style and content loss using a VGG-16 model trained on ImageNet.
 
 Uses perceptual loss to compute the style and content loss.
 """
+<<<<<<< HEAD
+=======
+import pathlib
+import numpy
+>>>>>>> b729986738384c74f52cac5d88f41522e381a4e0
 import torch
 import torchvision
 from collections import namedtuple
