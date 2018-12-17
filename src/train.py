@@ -135,8 +135,8 @@ if __name__ == "__main__":
                             help="disables CUDA training")
         parser.add_argument("--face", action="store_true",
                             help="facial preserving network")
-        parser.add_argument("--face-weight", type=float, default=1e6,
-                            help="weight for facial loss (default: 1e6)")
+        parser.add_argument("--face-weight", type=float, default=1e7,
+                            help="weight for facial loss (default: 1e7)")
         args = parser.parse_args()
         print("{}\n".format(args))
 
