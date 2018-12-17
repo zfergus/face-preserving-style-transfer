@@ -152,4 +152,4 @@ class FacePerceptualLossNet(PerceptualLossNet):
                         self.face_recog_model(yc_face),
                         self.face_recog_model(y_face))
 
-        return loss + 1e6 * facial_loss
+        return loss + 1e7 * facial_loss
