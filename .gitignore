@@ -76,9 +76,10 @@ images/faces
 papers
 others
 images/content/bridge.jpg
-styles/mosaic/bridge.png
-*.mkv
-styles/old
+images/results/mosaic/bridge.png
+**.mkv
+images/results/manga-artist
+models/manga-artist.pth
 coco*
 **checkpoint*
 **model_0*
