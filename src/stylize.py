@@ -4,8 +4,8 @@ import argparse
 import sys
 import torch
 
-from image_transform_net import ImageTransformNet
-import utils
+from .image_transform_net import ImageTransformNet
+from . import utils
 
 
 def stylize(args):

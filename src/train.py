@@ -5,9 +5,9 @@ import argparse
 import torch
 from torchvision import transforms, datasets
 
-from image_transform_net import ImageTransformNet
-from perceptual_loss_net import PerceptualLossNet
-import utils
+from .image_transform_net import ImageTransformNet
+from .perceptual_loss_net import PerceptualLossNet
+from . import utils
 
 
 def train(args):
