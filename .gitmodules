@@ -1,6 +1,6 @@
 [submodule "OpenFace-PyTorch"]
-	path = OpenFace-PyTorch
+	path = lib/OpenFace-PyTorch
 	url = git@github.com:zfergus/OpenFace-PyTorch.git
 [submodule "mtcnn-pytorch"]
-	path = mtcnn-pytorch
+	path = lib/mtcnn-pytorch
 	url = git@github.com:zfergus/mtcnn-pytorch.git
