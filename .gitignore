@@ -71,14 +71,13 @@ package-lock.json
 
 # Mine
 tmp*
-images/coco
-images/faces
 papers
 others
-images/content/bridge.jpg
-styles/mosaic/bridge.png
 *.mkv
-styles/old
+images/results/manga-artist
+models/manga-artist.pth
 coco*
-**checkpoint*
-**model_0*
+*checkpoint*
+*model_0*
+*zachary
+*amanda
