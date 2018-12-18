@@ -5,13 +5,13 @@ Fast style transfer with facial preservation.
 ## Training for new styles
 
 ```bash
-python src/train.py --content-images [path/to/content/] --style-image [path/to/style.jpg] --output [path/to/output/] [--face]
+python -m src.train --content-images [path/to/content/] --style-image [path/to/style.jpg] --output [path/to/output/] [--face]
 ```
 
 ## Stylizing images
 
 ```bash
-python src/stylize.py --content-image [path/to/content.ext] --style-model [path/to/model.pth] --output [path/to/output.png]
+python -m src.stylize --content-image [path/to/content.ext] --style-model [path/to/model.pth] --output [path/to/output.png]
 ```
 
 ## Results of base fast style transfer

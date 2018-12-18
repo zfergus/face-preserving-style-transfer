@@ -91,7 +91,7 @@ if __name__ == "__main__":
     def main():
         """Parse training settings."""
         parser = argparse.ArgumentParser(
-            description="Train CNN for Neural Style Transfer")
+            description="Train CNN for Neural Style Transfer.")
         parser.add_argument("--content-images", type=pathlib.Path,
                             required=True, metavar="path/to/content/",
                             help="folder where training data is located")

@@ -1,8 +1,8 @@
 """
-Compute the facial loss using facial recognition.
+Compute the face loss using facial recognition.
 
 Compute the style and content loss using a VGG-16 model trained on ImageNet.
-Uses perceptual loss to compute the style, content loss, and facial loss.
+Uses perceptual loss to compute the style, content loss, and face loss.
 """
 import numpy
 import torch
@@ -23,7 +23,7 @@ class FacePerceptualLossNet(perceptual_loss_net.PerceptualLossNet):
         """Initialize a face detection model on top of the perceptual loss."""
         super(FacePerceptualLossNet, self).__init__(
             content_weight, style_weights, regularization_weight)
-        # Save weight for facial loss
+        # Save weight for face loss
         self.face_weight = face_weight
         # Construct models for facial recognition
         self.face_recog_model = openface.net.model
@@ -32,12 +32,9 @@ class FacePerceptualLossNet(perceptual_loss_net.PerceptualLossNet):
         self.face_recog_model.eval()
         self.n_faces_seen = 0
 
-    def compute_perceptual_loss(self, y, yc, ys):
-        """Compute the perceptual loss including the face loss."""
-        loss = super(FacePerceptualLossNet, self).compute_perceptual_loss(
-            y, yc, ys)
-
-        facial_loss = 0.0
+    def compute_face_perceptual_loss(self, y, yc):
+        """Compute the face loss by using mtcnn and openface."""
+        face_loss = 0.0
         for i, image in enumerate(yc):
             image_array = image.cpu().numpy().clip(0, 255)
             pil_image = Image.fromarray(
@@ -64,8 +61,12 @@ class FacePerceptualLossNet(perceptual_loss_net.PerceptualLossNet):
                         y_face, size=(96, 96), mode="bilinear",
                         align_corners=False)
 
-                    facial_loss += self.mse_loss(
+                    face_loss += self.mse_loss(
                         self.face_recog_model(yc_face),
                         self.face_recog_model(y_face))
+        return self.face_weight + face_loss
 
-        return loss + self.face_weight * facial_loss
+    def compute_perceptual_loss(self, y, yc, ys):
+        """Compute the perceptual loss including the face loss."""
+        return super(FacePerceptualLossNet, self).compute_perceptual_loss(
+            y, yc, ys) + self.compute_face_perceptual_loss(y, yc)
