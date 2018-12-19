@@ -4,7 +4,6 @@ import numpy
 import torch
 from torchvision import transforms, datasets
 from PIL import Image
-import cv2 as cv
 
 image_net_mean = [0.485, 0.456, 0.406]
 image_net_std = [0.229, 0.224, 0.225]
@@ -95,60 +94,67 @@ def save_image_tensor(filename, image_tensor):
     image.save(filename, subsampling=0, quality=100)
 
 
-class VideoReaderWriter:
-    """Class to read and write a video file with the same properties."""
+# Try to import OpenCV for the video writer
+try:
+    import cv2 as cv
+except ImportError as e:
+    print("OpenCV not install or not found. Video options disabled.")
+else:
+    class VideoReaderWriter:
+        """Class to read and write a video file with the same properties."""
 
-    def __init__(self, in_file, out_file, batch_size=16):
-        """Open the input video and output video."""
-        self.in_video = cv.VideoCapture(str(in_file))
-        self.frame_count = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
-        self.fps = int(self.in_video.get(cv.CAP_PROP_FPS))
-        self.frame_width = int(self.in_video.get(cv.CAP_PROP_FRAME_WIDTH))
-        self.frame_height = int(self.in_video.get(cv.CAP_PROP_FRAME_HEIGHT))
+        def __init__(self, in_file, out_file, batch_size=16):
+            """Open the input video and output video."""
+            self.in_video = cv.VideoCapture(str(in_file))
+            self.frame_count = int(self.in_video.get(cv.CAP_PROP_FRAME_COUNT))
+            self.fps = int(self.in_video.get(cv.CAP_PROP_FPS))
+            self.frame_width = int(self.in_video.get(cv.CAP_PROP_FRAME_WIDTH))
+            self.frame_height = int(
+                self.in_video.get(cv.CAP_PROP_FRAME_HEIGHT))
 
-        self.batch_size = batch_size
-        self.buf = numpy.empty(
-            (self.batch_size, self.frame_height, self.frame_width, 3),
-            dtype='uint8')
+            self.batch_size = batch_size
+            self.buf = numpy.empty(
+                (self.batch_size, self.frame_height, self.frame_width, 3),
+                dtype='uint8')
 
-        fourcc = cv.VideoWriter_fourcc(*'MPEG')
-        pathlib.Path(out_file).parent.mkdir(parents=True, exist_ok=True)
-        self.out_video = cv.VideoWriter(str(out_file), fourcc,
-                                        self.fps,
-                                        (self.frame_width, self.frame_height))
+            fourcc = cv.VideoWriter_fourcc(*'MPEG')
+            pathlib.Path(out_file).parent.mkdir(parents=True, exist_ok=True)
+            self.out_video = cv.VideoWriter(
+                str(out_file), fourcc, self.fps,
+                (self.frame_width, self.frame_height))
 
-    def frames(self):
-        """
-        Get the frames of the input as a generator.
+        def frames(self):
+            """
+            Get the frames of the input as a generator.
 
-        Closes both videos upon completion.
-        """
-        fc = 0
-        ret = True
+            Closes both videos upon completion.
+            """
+            fc = 0
+            ret = True
 
-        while fc < self.frame_count and ret:
-            nFrames = min(self.batch_size, self.frame_count - fc)
-            for i in range(nFrames):
-                ret, buffer_i = self.in_video.read()
-                if buffer_i is not None:
-                    self.buf[i] = buffer_i
-                else:
-                    nFrames = i
-                    ret = False
-                    break
-                fc += 1
-            yield torch.tensor(
-                self.buf[:nFrames].transpose(0, 3, 1, 2)).float()
+            while fc < self.frame_count and ret:
+                nFrames = min(self.batch_size, self.frame_count - fc)
+                for i in range(nFrames):
+                    ret, buffer_i = self.in_video.read()
+                    if buffer_i is not None:
+                        self.buf[i] = buffer_i
+                    else:
+                        nFrames = i
+                        ret = False
+                        break
+                    fc += 1
+                yield torch.tensor(
+                    self.buf[:nFrames].transpose(0, 3, 1, 2)).float()
 
-        self.close()
+            self.close()
 
-    def write(self, frames):
-        """Write frames to the output video."""
-        for frame in frames:
-            self.out_video.write(
-                frame.numpy().transpose(1, 2, 0).astype("uint8"))
+        def write(self, frames):
+            """Write frames to the output video."""
+            for frame in frames:
+                self.out_video.write(
+                    frame.numpy().transpose(1, 2, 0).astype("uint8"))
 
-    def close(self):
-        """Close the input and output videos."""
-        self.in_video.release()
-        self.out_video.release()
+        def close(self):
+            """Close the input and output videos."""
+            self.in_video.release()
+            self.out_video.release()
