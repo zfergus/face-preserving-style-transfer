@@ -76,5 +76,7 @@ if __name__ == "__main__":
                             help="disables CUDA training")
         parser.add_argument("--video", action="store_true",
                             help="stylize a video")
-        stylize(parser.parse_args())
+        args = parser.parse_args()
+        args.video &= "cv2" in sys.modules
+        stylize(args)
     main()

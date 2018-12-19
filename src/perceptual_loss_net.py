@@ -29,20 +29,29 @@ class PerceptualLossNet(torch.nn.Module):
     def __init__(self, content_weight, style_weights, regularization_weight):
         """Initialize the layers to use for loss computation."""
         super(PerceptualLossNet, self).__init__()
+        # Use VGG-16 to compute the perceptual loss
         vgg_model = torchvision.models.vgg16(pretrained=True)
         self.vgg_layers = vgg_model.features
+        # Activation layers of interest
         self.layer_name_mapping = {"3": "relu1_2", "8": "relu2_2",
                                    "15": "relu3_3", "22": "relu4_3"}
         for param in self.parameters():
                 param.requires_grad = False
-        self.ys_grams = None
+        # Save weights for later
+        self.ys_grams = None  # Precomputed gram matrix for the style image
         self.content_weight = content_weight
         self.style_weights = style_weights
         self.regularization_weight = regularization_weight
+        # Use mean square error for loss computations
         self.mse_loss = torch.nn.MSELoss()
 
     def forward(self, x):
-        """Forward pass through the vgg to compute the perceptual loss."""
+        """
+        Forward pass through the vgg to compute the perceptual loss.
+
+        Based on:
+        https://discuss.pytorch.org/t/how-to-extract-features-of-an-image-from-a-trained-model/119/3
+        """
         output = {}
         for name, module in self.vgg_layers._modules.items():
             x = module(x)
@@ -90,5 +99,4 @@ class PerceptualLossNet(torch.nn.Module):
             torch.sum(torch.abs(y[:, :, 1:, :] - y[:, :, -1:, :])))
 
         # The total loss is a weighted sum of the loss values
-        # return content_loss + style_loss + total_variation
-        return content_loss + style_loss
+        return content_loss + style_loss + total_variation
