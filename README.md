@@ -30,13 +30,13 @@ by Georges Seurat
     * example results: `images/results/manga/`
 * `models/manga-face.pth`: Style of artwork from *Fullmetal Alchemist* by Hiromu Arakawa with facial preservation
     * style image: `images/styles/manga.png`
-    * example results: `images/results/manga/`
+    * example results: `images/results/manga-face/`
 * `models/mosaic.pth`: Style of a mosaic tiling
     * style image: `images/styles/mosaic.jpg`
     * example results: `images/results/mosaic/`
 * `models/mosaic-face.pth`: Style of a mosaic tiling with facial preservation
-* style image: `images/styles/mosaic.jpg`
-* example results: `images/results/mosaic/`
+    * style image: `images/styles/mosaic.jpg`
+    * example results: `images/results/mosaic-face/`
 * `models/rains-rustle.pth`: Style of *Rain's Rustle* by Leonid Afremov
     * style image: `images/styles/Rain's-Rustle-by-Leonid-Afremov.jpg`
     * example results: `images/results/rains-rustle/`
