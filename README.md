@@ -10,13 +10,17 @@ calculated by using MTCNN to find faces and OpenFace to compute a 128-dimension
 face descriptor. The loss is then the squared distance between face
 descriptors.
 
-## Stylizing images
+**Report:**
+* [ferguson-zachary-report-small.pdf (compressed, 30 MB)](ferguson-zachary-reposrt-small.pdf)
+* [ferguson-zachary-report.pdf (full resolution, 271 MB)](ferguson-zachary-reposrt.pdf)
+
+## Stylizing Images
 
 ```bash
 python -m src.stylize --content-image [path/to/content.ext] --style-model [path/to/model.pth] --output [path/to/output.png]
 ```
 
-### Pretrained model
+### Pretrained Model
 
 We provide a number of different pretrained style model in the `models`
 directory. The style models include:
@@ -47,7 +51,7 @@ by Georges Seurat
     * style image: `images/styles/Great-Wave-off-Kanagawa.jpg`
     * example results: `images/results/wave/`
 
-## Training for new styles
+## Training for New Styles
 
 To train a new style model you need to first download a image dataset
 (the pretrained models were trained using the COCO 2017 Train Images
@@ -62,7 +66,7 @@ where python is Python >=3.5, `path/to/content/` is the path to the root of the
 training dataset, `path/to/style.jpg` is the image of the style to learn, and
 `--face` turns on facial preservation.
 
-## Results of base fast style transfer
+## Results of Fast Style Transfer
 
 |  | ![](images/styles/mosaic.jpg) | ![](images/styles/Great-Wave-off-Kanagawa.jpg)  | ![](images/styles/A-Sunday-Afternoon-on-the-Island-of-La-Grande-Jatte.jpg)  | ![](images/styles/Starry-Night-by-Vincent-Van-Gogh.jpg)  | ![](images/styles/Rain's-Rustle-by-Leonid-Afremov.jpg) | ![](images/styles/manga.png) |
 |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
