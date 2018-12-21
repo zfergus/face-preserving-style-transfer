@@ -78,10 +78,18 @@ training dataset, `path/to/style.jpg` is the image of the style to learn, and
 | ![](images/content/viking.jpg) | ![](images/results/mosaic/viking.png) | ![](images/results/wave/viking.png) | ![](images/results/grande-jatte/viking.png) | ![](images/results/stary-night/viking.png) | ![](images/results/rains-rustle/viking.png) | ![](images/results/manga/viking.png) |
 
 ## Results of Face Preserving Style Transfer
-| ![](images/styles/mosaic.jpg) | Without Facial Preservation | With Facial Preservation | ![](images/styles/manga.png) | Without Facial Preservation | With Facial Preservation
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| ![](images/faces/elvis.jpg) | ![](images/results/mosaic-face/elvis-face=false.png) | ![](images/results/mosaic-face/elvis-face=true.png) | | ![](images/results/manga-face/elvis-face=false.png) | ![](images/results/manga-face/elvis-face=true.png)
-| ![](images/faces/ernest-hemingway.jpg) | ![](images/results/mosaic-face/ernest-hemingway-face=false.png) | ![](images/results/mosaic-face/ernest-hemingway-face=true.png) || ![](images/results/manga-face/ernest-hemingway-face=false.png) | ![](images/results/manga-face/ernest-hemingway-face=true.png)
-| ![](images/faces/jackie-chan.jpg) | ![](images/results/mosaic-face/jackie-chan-face=false.png) | ![](images/results/mosaic-face/jackie-chan-face=true.png) || ![](images/results/manga-face/jackie-chan-face=false.png) | ![](images/results/manga-face/jackie-chan-face=true.png)
-| ![](images/faces/john-snow.jpg) | ![](images/results/mosaic-face/john-snow-face=false.png) | ![](images/results/mosaic-face/john-snow-face=true.png) | | ![](images/results/manga-face/john-snow-face=false.png) | ![](images/results/manga-face/john-snow-face=true.png)
-| ![](images/faces/stranger-things.jpg) | ![](images/results/mosaic-face/stranger-things-face=false.png) | ![](images/results/mosaic-face/stranger-things-face=true.png) || ![](images/results/manga-face/stranger-things-face=false.png) | ![](images/results/manga-face/stranger-things-face=true.png)
+| ![](images/styles/mosaic.jpg) | Without Facial Preservation | With Facial Preservation
+|:-----:|:-----:|:-----:|
+| ![](images/faces/elvis.jpg) | ![](images/results/mosaic-face/elvis-face=false.png) | ![](images/results/mosaic-face/elvis-face=true.png) |
+| ![](images/faces/ernest-hemingway.jpg) | ![](images/results/mosaic-face/ernest-hemingway-face=false.png) | ![](images/results/mosaic-face/ernest-hemingway-face=true.png) |
+| ![](images/faces/jackie-chan.jpg) | ![](images/results/mosaic-face/jackie-chan-face=false.png) | ![](images/results/mosaic-face/jackie-chan-face=true.png) |
+| ![](images/faces/john-snow.jpg) | ![](images/results/mosaic-face/john-snow-face=false.png) | ![](images/results/mosaic-face/john-snow-face=true.png) |
+| ![](images/faces/stranger-things.jpg) | ![](images/results/mosaic-face/stranger-things-face=false.png) | ![](images/results/mosaic-face/stranger-things-face=true.png) |
+
+| ![](images/styles/manga.png) | Without Facial Preservation | With Facial Preservation
+|:-----:|:-----:|:-----:|
+| ![](images/faces/elvis.jpg) | ![](images/results/manga-face/elvis-face=false.png) | ![](images/results/manga-face/elvis-face=true.png) |
+| ![](images/faces/ernest-hemingway.jpg) | ![](images/results/manga-face/ernest-hemingway-face=false.png) | ![](images/results/manga-face/ernest-hemingway-face=true.png) |
+| ![](images/faces/jackie-chan.jpg) | ![](images/results/manga-face/jackie-chan-face=false.png) | ![](images/results/manga-face/jackie-chan-face=true.png) |
+| ![](images/faces/john-snow.jpg) | ![](images/results/manga-face/john-snow-face=false.png) | ![](images/results/manga-face/john-snow-face=true.png) |
+| ![](images/faces/stranger-things.jpg) | ![](images/results/manga-face/stranger-things-face=false.png) | ![](images/results/manga-face/stranger-things-face=true.png) |
