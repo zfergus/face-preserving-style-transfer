@@ -11,8 +11,8 @@ face descriptor. The loss is then the squared distance between face
 descriptors.
 
 **Report:**
-* [ferguson-zachary-report-small.pdf (compressed, 30 MB)](ferguson-zachary-reposrt-small.pdf)
-* [ferguson-zachary-report.pdf (full resolution, 271 MB)](ferguson-zachary-reposrt.pdf)
+* [ferguson-zachary-report-small.pdf (small, 30 MB)](ferguson-zachary-reposrt-small.pdf)
+* [ferguson-zachary-report.pdf (large, 86 MB)](ferguson-zachary-reposrt.pdf)
 
 ## Stylizing Images
 
