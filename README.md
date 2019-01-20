@@ -86,19 +86,16 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/mosaic/amber.png" width="24%">
-
     <img src="images/results/mosaic/corgi-square.png" width="24%">
     <img src="images/content/corgi-square.png" width="24%">
     <br>
     <img src="images/content/tokyo-square.png" width="24%">
     <img src="images/results/mosaic/tokyo-square.png" width="24%">
-
     <img src="images/results/mosaic/golden-gate-bridge-square.png" width="24%">
     <img src="images/content/golden-gate-bridge-square.png" width="24%">
     <br>
     <img src="images/content/manga-square.png" width="24%">
     <img src="images/results/mosaic/restylized/manga-square.png" width="24%">
-
     <img src="images/results/mosaic/wave-square.png" width="24%">
     <img src="images/content/wave-square.png" width="24%">
 </p>
@@ -109,19 +106,16 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/manga/amber.png" width="24%">
-
     <img src="images/results/manga/corgi-square.png" width="24%">
     <img src="images/content/corgi-square.png" width="24%">
     <br>
     <img src="images/content/tokyo-square.png" width="24%">
     <img src="images/results/manga/tokyo-square.png" width="24%">
-
     <img src="images/results/manga/golden-gate-bridge-square.png" width="24%">
     <img src="images/content/golden-gate-bridge-square.png" width="24%">
     <br>
     <img src="images/content/surfing-square.jpg" width="24%">
     <img src="images/results/manga/surfing-square.png" width="24%">
-
     <img src="images/results/manga/viking-square.png" width="24%">
     <img src="images/content/viking-square.png" width="24%">
 </p>
@@ -132,19 +126,16 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/rains-rustle/amber.png" width="24%">
-
     <img src="images/results/rains-rustle/corgi-square.png" width="24%">
     <img src="images/content/corgi-square.png" width="24%">
     <br>
     <img src="images/content/tokyo-square.png" width="24%">
     <img src="images/results/rains-rustle/tokyo-square.png" width="24%">
-
     <img src="images/results/rains-rustle/golden-gate-bridge-square.png" width="24%">
     <img src="images/content/golden-gate-bridge-square.png" width="24%">
     <br>
     <img src="images/content/surfing-square.jpg" width="24%">
     <img src="images/results/rains-rustle/surfing-square.png" width="24%">
-
     <img src="images/results/rains-rustle/viking-square.png" width="24%">
     <img src="images/content/viking-square.png" width="24%">
 </p>
@@ -155,19 +146,16 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/wave/amber.png" width="24%">
-
     <img src="images/results/wave/corgi-square.png" width="24%">
     <img src="images/content/corgi-square.png" width="24%">
     <br>
     <img src="images/content/tokyo-square.png" width="24%">
     <img src="images/results/wave/tokyo-square.png" width="24%">
-
     <img src="images/results/wave/golden-gate-bridge-square.png" width="24%">
     <img src="images/content/golden-gate-bridge-square.png" width="24%">
     <br>
     <img src="images/content/surfing-square.jpg" width="24%">
     <img src="images/results/wave/surfing-square.png" width="24%">
-
     <img src="images/results/wave/viking-square.png" width="24%">
     <img src="images/content/viking-square.png" width="24%">
 </p>
