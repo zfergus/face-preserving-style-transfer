@@ -86,7 +86,7 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
 
 ### Mosaic Style
 <p align="center">
-    <img src="images/styles/mosaic.jpg" width="300px">
+    <img src="images/styles/mosaic.jpg" width="35%">
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/mosaic/amber.png" width="24%">
@@ -106,7 +106,7 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
 
 ### Manga Style
 <p align="center">
-    <img src="images/styles/manga.png" width="300px">
+    <img src="images/styles/manga.png" width="35%">
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/manga/amber.png" width="24%">
@@ -126,7 +126,7 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
 
 ### Rain's Rustle Style
 <p align="center">
-    <img src="images/styles/Rain's-Rustle-by-Leonid-Afremov.jpg" width="300px">
+    <img src="images/styles/Rain's-Rustle-by-Leonid-Afremov.jpg" width="35%">
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/rains-rustle/amber.png" width="24%">
@@ -146,7 +146,7 @@ and Super-Resolution" [Johnson et al. 2016]](https://cs.stanford.edu/people/jcjo
 
 ### Great Wave off Kanagawa Style
 <p align="center">
-    <img src="images/styles/Great-Wave-off-Kanagawa.jpg" width="300px">
+    <img src="images/styles/Great-Wave-off-Kanagawa.jpg" width="35%">
     <br>
     <img src="images/content/amber.jpg" width="24%">
     <img src="images/results/wave/amber.png" width="24%">
