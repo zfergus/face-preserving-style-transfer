@@ -1,5 +1,9 @@
 # Face Preserving Style Transfer
 
+| **Style** | **Content** | **Content Stylized Without Facial Preservation** | **Content Stylized With Facial Preservation** |
+|:---------:|:-----------:|:------------------------------------------------:|:-----------------------------:|
+| <img src="images/styles/manga.png" width=350px> | <img src="images/faces/stranger-things.jpg" width=600px> | <img src="images/results/manga-face/stranger-things-face=false.png" width=600px> | <img src="images/results/manga-face/stranger-things-face=true.png" width=600px> |
+
 **Fast style transfer with facial preservation.**
 
 #### Abstract
